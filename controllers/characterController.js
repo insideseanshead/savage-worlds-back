@@ -21,10 +21,8 @@ const checkAuthStatus = request => {
 }
 
 router.get('/',(req,res)=>{
-    db.Campaign.findAll({
-        include:[db.Character]
-    }).then(campaigns => {
-        res.json(campaigns);
+    db.Character.findAll().then(characters=>{
+        res.json(characters);
     }).catch(err=>{
         console.log(err)
         res.status(500).send('something went wrong')
@@ -32,88 +30,103 @@ router.get('/',(req,res)=>{
 })
 
 router.get('/:id',(req,res)=>{
-    db.Campaign.findOne({
+    db.Character.findOne({
         where:{
             id:req.params.id
-        },
-        include:[db.Character]
-    }).then(dbCampaign => {
-        res.json(dbCampaign);
+        }
+    }).then(dbCharacter=>{
+        res.json(dbCharacter);
     }).catch(err=>{
         console.log(err)
         res.status(500).send('something went wrong')
     })
 })
 
+// Edit so people can add characters to different users campaigns.
 router.post('/',(req,res)=>{
     const loggedInUser = checkAuthStatus(req);
     if(!loggedInUser){
         return res.status(401).send('login first')
     }
     console.log(loggedInUser)
-    db.Campaign.create({
-        name:req.body.name,
-        UserId:loggedInUser.id
-    }).then(newCampaign=>{
-        res.json(newCampaign)
-    }).catch(err=>{
-        console.log(err)
-        res.status(500).send('something went wrong')
+    db.Campaign.findOne({
+        where:{
+            id:req.body.campaignId
+        }
+    }).then(campaignData=>{
+        if(campaignData.UserId===loggedInUser.id){
+            db.Character.create({
+                name:req.body.name,
+                player:req.body.player,
+                UserId:loggedInUser.id,
+                CampaignId:req.body.campaignId
+            }).then(newCharacter=>{
+                return res.json(newCharacter)
+            }).catch(err=>{
+                console.log(err)
+                return res.status(500).send('something went wrong')
+            })
+        }else{
+           return res.status(401).send('not your Campaign') 
+        }
     })
+    
 })
 
-router.put('./:id',(req,res)=>{
+router.put("/:id",(req,res)=>{
     const loggedInUser = checkAuthStatus(req);
     if(!loggedInUser){
         return res.status(401).send('login first')
     }
-    db.Campaign.findOne({
+    db.Character.findOne({
         where:{
             id:req.params.id
         }
-    }).then(campaign=>{
-        if(loggedInUser.id===campaign.userId){
-            db.Campaign.update({
-                name:req.body.name
+    }).then(character=>{
+        if(loggedInUser.id===character.UserId){
+            db.Character.update({
+                name:req.body.name,
+                player:req.body.player,
+                CampaignId:req.body.CampaignId
             },{
                 where:{
-                    id:campaign.id
+                    id:character.id
                 }
-            }).then(editCampaign =>{
-                res.json(editCampaign)
+            }).then(editCharacter =>{
+                res.json(editCharacter)
             }).catch(err=>{
                 console.log(err)
                 res.status(500).send('something went wrong')
             })
         } else {
-            return res.status(401).send('not your campaign!')
+            return res.status(401).send("not your Character!")
         }
     })
 })
 
-router.delete('/:id',(req,res)=>{
+router.delete("/:id",(req,res)=>{
     const loggedInUser = checkAuthStatus(req);
     if(!loggedInUser){
         return res.status(401).send('login first')
     }
-    db.Campaign.findOne({
+    db.Character.findOne({
         where:{
             id:req.params.id
         }
-    }).then(campaign=>{
-        if(loggedInUser.id===campaign.UserId){
-            db.Campaign.destroy({
+    }).then(character=>{
+        if(loggedInUser.id===character.UserId){
+            db.Character.destroy({
                 where:{
-                    id:campaign.id
+                    id:character.id
                 }
-            }).then(delCampaign =>{
-                res.json(delCampaign)
+            }).then(delCharacter =>{
+                res.json(delCharacter)
             }).catch(err=>{
                 console.log(err)
-                res.status(500).send('Something went wrong')
+                res.status(500).send('something went wrong')
             })
         } else {
-            return res.status(401).send('not your campaign!')
+            return res.status(401).send("not your Character!")
         }
     })
 })
