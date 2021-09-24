@@ -10,7 +10,7 @@ router.get('/',(req,res)=>{
 })
 
 router.use('/api/users',userRoutes);
-router.use('/api/campaign',campaignRoutes);
-router.use('/api/character',characterRoutes);
+router.use('/api/campaigns',campaignRoutes);
+router.use('/api/characters',characterRoutes);
 
 module.exports = router
