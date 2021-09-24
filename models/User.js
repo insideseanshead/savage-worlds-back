@@ -17,8 +17,8 @@ module.exports = function(sequelize, DataTypes) {
     });
 
     User.associate = function(models) {
-        User.hasMany(models.Campaigns);
-        User.hasMany(models.Characters);
+        User.hasMany(models.Campaign);
+        User.hasMany(models.Character);
     }
 
     User.beforeCreate(function (user) {

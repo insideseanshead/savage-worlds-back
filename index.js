@@ -4,7 +4,7 @@ require('dotenv').config();
 // ============================================================
 var app = express();
 var PORT = process.env.PORT || 8000;
-const cors = requre('cors')
+// const cors = requre('cors')
 var allRoutes = require('./controllers');
 
 // Requiring modesl for syncing
@@ -14,15 +14,13 @@ var db = require('./models');
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 
-
 //Production CORS
 // app.use(cors({
 //     origin: [""]
 // }))
 
-
 // DEV CORS
-app.use(cors());
+// app.use(cors());
 
 app.use('/', allRoutes);
 
